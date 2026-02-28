@@ -65,6 +65,7 @@ export function useDragSort<T>(
         itemElements: [] as HTMLElement[],
         itemRects: [] as DOMRect[],
         ghostEl: null as HTMLElement | null,
+        ghostWrapperEl: null as HTMLElement | null,
         containerEl: null as HTMLElement | null,
         currentOverIndex: -1,
         dragOffsetY: 0,
@@ -82,6 +83,23 @@ export function useDragSort<T>(
      */
     const createGhost = useCallback((sourceEl: HTMLElement, clientY: number) => {
         const rect = sourceEl.getBoundingClientRect()
+
+        // 检测当前是否处于暗黑模式（向上查找包含 dark 类的祖先元素）
+        const isDarkMode = !!sourceEl.closest('.dark')
+
+        // 创建一个包裹容器，确保暗黑模式的 Tailwind 类能正确生效
+        const wrapper = document.createElement('div')
+        wrapper.style.position = 'fixed'
+        wrapper.style.left = '0'
+        wrapper.style.top = '0'
+        wrapper.style.width = '100%'
+        wrapper.style.height = '100%'
+        wrapper.style.pointerEvents = 'none'
+        wrapper.style.zIndex = '9999'
+        if (isDarkMode) {
+            wrapper.className = 'dark'
+        }
+
         const ghost = sourceEl.cloneNode(true) as HTMLElement
         ghost.className = sourceEl.className + ' drag-ghost'
         ghost.style.position = 'fixed'
@@ -89,16 +107,21 @@ export function useDragSort<T>(
         ghost.style.top = `${rect.top}px`
         ghost.style.width = `${rect.width}px`
         ghost.style.height = `${rect.height}px`
-        ghost.style.zIndex = '9999'
         ghost.style.pointerEvents = 'none'
         ghost.style.transition = 'box-shadow 0.2s, transform 0.2s'
-        ghost.style.boxShadow = '0 8px 32px rgba(0,0,0,0.18)'
+        // 暗黑模式使用浅色阴影，亮色模式使用深色阴影
+        ghost.style.boxShadow = isDarkMode
+            ? '0 8px 32px rgba(0,0,0,0.45)'
+            : '0 8px 32px rgba(0,0,0,0.18)'
         ghost.style.transform = 'scale(1.03)'
         ghost.style.borderRadius = '8px'
         ghost.style.opacity = '0.95'
-        document.body.appendChild(ghost)
+
+        wrapper.appendChild(ghost)
+        document.body.appendChild(wrapper)
 
         stateRef.current.ghostEl = ghost
+        stateRef.current.ghostWrapperEl = wrapper
         stateRef.current.dragOffsetY = clientY - rect.top
         return ghost
     }, [])
@@ -107,10 +130,12 @@ export function useDragSort<T>(
      * 移除幽灵元素
      */
     const removeGhost = useCallback(() => {
-        if (stateRef.current.ghostEl) {
-            stateRef.current.ghostEl.remove()
-            stateRef.current.ghostEl = null
+        // 移除包裹容器（同时会移除内部的 ghost 元素）
+        if (stateRef.current.ghostWrapperEl) {
+            stateRef.current.ghostWrapperEl.remove()
+            stateRef.current.ghostWrapperEl = null
         }
+        stateRef.current.ghostEl = null
     }, [])
 
     /**

@@ -94,7 +94,7 @@ export function AccountCard({ account, selectable, selected, onSelect, onCopy }:
 							</div>
 						)}
 						<div className="flex-1 min-w-0">
-							<div className="text-xs truncate tracking-wide">{account.issuer}</div>
+							<div className="text-xs truncate tracking-wide dark:text-white">{account.issuer}</div>
 							<div className="text-[10px] text-gray-400 dark:text-gray-400 truncate tracking-wide">{account.account}</div>
 						</div>
 					</div>
