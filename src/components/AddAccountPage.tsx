@@ -29,6 +29,7 @@ const PLATFORMS = [
 	{ name: 'Google', logo: 'google-icon.svg' },
 	{ name: 'IBM', logo: 'ibm-icon.svg' },
 	{ name: 'Instagram', logo: 'instagram-icon.svg' },
+	{ name: 'LINUX DO', logo: 'linux.do-icon.svg' },
 	{ name: 'Metabase', logo: 'metabase-icon.svg' },
 	{ name: 'Microsoft', logo: 'microsoft-icon.svg' },
 	{ name: 'Microsoft Edge', logo: 'microsoft_edge-icon.svg' },
@@ -66,7 +67,7 @@ export function AddAccountPage({ existingAccounts, onImport, onImportMultiple, o
 				return
 			}
 
-			const pathParts = parsed.pathname.slice(1).split(':')
+			const pathParts = decodeURIComponent(parsed.pathname.slice(1)).split(':')
 			const accountName = pathParts[pathParts.length - 1]
 			const issuerName = pathParts.length > 1 ? pathParts[0] : parsed.searchParams.get('issuer') || ''
 			const secretKey = parsed.searchParams.get('secret') || ''

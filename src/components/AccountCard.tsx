@@ -26,6 +26,8 @@ const LOGO_MAP: Record<string, string> = {
 	'google': 'google-icon.svg',
 	'ibm': 'ibm-icon.svg',
 	'instagram': 'instagram-icon.svg',
+	'linux.do': 'linux.do-icon.svg',
+	'linuxdo': 'linux.do-icon.svg',
 	'metabase': 'metabase-icon.svg',
 	'microsoft': 'microsoft-icon.svg',
 	'microsoftedge': 'microsoft_edge-icon.svg',
@@ -82,7 +84,7 @@ export function AccountCard({ account, selectable, selected, onSelect, onCopy }:
 			<div className={`bg-white dark:bg-gray-800 rounded-md ${selectable ? 'p-1 py-2' : 'p-3'} flex-1 min-w-0 transition-transform duration-150 ${isPressed ? 'scale-95' : 'scale-100'}`}>
 
 				{/* 顶部：Logo + 邮箱 (左) 和 倒计时 (右) */}
-				<div className="flex items-start justify-between items-center mb-4">
+				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-2 flex-1 min-w-0">
 						{displayLogo ? (
 							<div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden bg-white dark:bg-gray-700 p-1">

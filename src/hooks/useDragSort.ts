@@ -12,9 +12,6 @@ interface DragState {
     isDragging: boolean
 }
 
-/**
- * 注入到每个可拖拽元素上的事件处理器和样式
- */
 interface DragItemProps {
     onPointerDown: (e: React.PointerEvent) => void
     style: React.CSSProperties
@@ -61,12 +58,15 @@ export function useDragSort<T>(
         isDragging: false,
         dragIndex: -1,
         startY: 0,
+        startX: 0,
         currentY: 0,
         itemElements: [] as HTMLElement[],
         itemRects: [] as DOMRect[],
         ghostEl: null as HTMLElement | null,
         ghostWrapperEl: null as HTMLElement | null,
         containerEl: null as HTMLElement | null,
+        scrollEl: null as HTMLElement | null,
+        scrollTopAtSnapshot: 0,
         currentOverIndex: -1,
         dragOffsetY: 0,
     })
@@ -149,6 +149,15 @@ export function useDragSort<T>(
         )
         stateRef.current.itemElements = elements
         stateRef.current.itemRects = elements.map(el => el.getBoundingClientRect())
+        // 查找可滚动的祖先容器
+        let scrollEl: HTMLElement | null = container.parentElement
+        while (scrollEl) {
+            const { overflow, overflowY } = getComputedStyle(scrollEl)
+            if (/(auto|scroll)/.test(overflow + overflowY)) break
+            scrollEl = scrollEl.parentElement
+        }
+        stateRef.current.scrollEl = scrollEl
+        stateRef.current.scrollTopAtSnapshot = scrollEl ? scrollEl.scrollTop : 0
     }, [])
 
     /**
@@ -156,12 +165,11 @@ export function useDragSort<T>(
      */
     const getOverIndex = useCallback((clientY: number): number => {
         const rects = stateRef.current.itemRects
-        const dragIdx = stateRef.current.dragIndex
+        const scrollEl = stateRef.current.scrollEl
+        const scrollDelta = scrollEl ? scrollEl.scrollTop - stateRef.current.scrollTopAtSnapshot : 0
 
         for (let i = 0; i < rects.length; i++) {
-            if (i === dragIdx) continue
-            const rect = rects[i]
-            const midY = rect.top + rect.height / 2
+            const midY = rects[i].top - scrollDelta + rects[i].height / 2
             if (clientY < midY) {
                 return i
             }
@@ -188,7 +196,7 @@ export function useDragSort<T>(
         // 长按等待阶段：如果移动过大则取消
         if (state.longPressTimer && !state.isDragging) {
             const dy = Math.abs(e.clientY - state.startY)
-            const dx = Math.abs(e.clientX - state.startY) // 简化：只检查 Y 方向
+            const dx = Math.abs(e.clientX - state.startX)
             if (dy > MOVE_THRESHOLD || dx > MOVE_THRESHOLD) {
                 clearTimeout(state.longPressTimer)
                 state.longPressTimer = null
@@ -312,6 +320,7 @@ export function useDragSort<T>(
             const state = stateRef.current
 
             state.startY = e.clientY
+            state.startX = e.clientX
             state.dragIndex = index
             state.containerEl = target.parentElement
 
