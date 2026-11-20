@@ -9,7 +9,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
 export function Select({ label, icon: Icon, options, className = '', ...props }: SelectProps) {
 	return (
 		<div>
-			<label className="block text-sm font-medium mb-1 dark:text-gray-200">{label}</label>
+			<label htmlFor={props.id} className="block text-sm font-medium mb-1 dark:text-gray-200">{label}</label>
 			<div className="relative">
 				<Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
 				<select

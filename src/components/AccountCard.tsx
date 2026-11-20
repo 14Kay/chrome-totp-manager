@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useTOTP } from '@/hooks/useTOTP'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useLogoCatalog } from '@/hooks/useLogoCatalog'
+import { getLogoSources } from '@/lib/logos'
+import { LogoImage } from './LogoImage'
 import type { Account } from '@/types'
 
 interface AccountCardProps {
@@ -11,46 +14,13 @@ interface AccountCardProps {
 	onCopy?: (issuer: string) => void
 }
 
-const LOGO_MAP: Record<string, string> = {
-	'alibabacloud': 'alibabacloud-icon.svg',
-	'alibaba': 'alibabacloud-icon.svg',
-	'aliyun': 'alibabacloud-icon.svg',
-	'apple': 'apple-icon.svg',
-	'bing': 'bing-icon.svg',
-	'cloudflare': 'cloudflare-icon.svg',
-	'epic': 'epicgames-icon.svg',
-	'epicgames': 'epicgames-icon.svg',
-	'github': 'github-icon.svg',
-	'gitlab': 'gitlab-icon.svg',
-	'gmail': 'gmail-icon.svg',
-	'google': 'google-icon.svg',
-	'ibm': 'ibm-icon.svg',
-	'instagram': 'instagram-icon.svg',
-	'linux.do': 'linux.do-icon.svg',
-	'linuxdo': 'linux.do-icon.svg',
-	'metabase': 'metabase-icon.svg',
-	'microsoft': 'microsoft-icon.svg',
-	'microsoftedge': 'microsoft_edge-icon.svg',
-	'edge': 'microsoft_edge-icon.svg',
-	'npm': 'npmjs-icon.svg',
-	'npmjs': 'npmjs-icon.svg',
-	'rockstar': 'rockstargames-icon.svg',
-	'rockstargames': 'rockstargames-icon.svg',
-	'twitter': 'twitter-icon.svg',
-	'zoom': 'zoomus-icon.svg',
-	'zoomus': 'zoomus-icon.svg',
-}
-
-const matchLogo = (issuer: string): string | undefined => {
-	const normalized = issuer.toLowerCase().replace(/\s+/g, '')
-	return LOGO_MAP[normalized]
-}
-
 export function AccountCard({ account, selectable, selected, onSelect, onCopy }: AccountCardProps) {
 	const { code, remaining } = useTOTP(account.secret)
 	const { t } = useLanguage()
+	const { platforms } = useLogoCatalog()
 	const isLowTime = remaining <= 5
-	const displayLogo = account.logo || matchLogo(account.issuer)
+	const [failedLogos, setFailedLogos] = useState<string[]>([])
+	const displayLogo = getLogoSources(account.issuer, account.logo, platforms).find(source => !failedLogos.includes(source))
 	const [isPressed, setIsPressed] = useState(false)
 
 	const handleCopy = () => {
@@ -88,7 +58,12 @@ export function AccountCard({ account, selectable, selected, onSelect, onCopy }:
 					<div className="flex items-center gap-2 flex-1 min-w-0">
 						{displayLogo ? (
 							<div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden bg-white dark:bg-gray-700 p-1">
-								<img src={`/logos/${displayLogo}`} alt={account.issuer} className="w-full h-full object-contain" />
+								<LogoImage
+									key={displayLogo}
+									src={displayLogo}
+									alt={account.issuer}
+									onError={() => setFailedLogos(previous => [...previous, displayLogo])}
+								/>
 							</div>
 						) : (
 							<div className="w-8 h-8 bg-[#fafafa] rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 dark:bg-gray-700">

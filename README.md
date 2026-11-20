@@ -18,6 +18,7 @@
 - 🔐 **Secure TOTP Generation** - Generate time-based one-time passwords for two-factor authentication
 - 📱 **Multi-Account Management** - Manage unlimited 2FA accounts in one place
 - 🎨 **Modern UI** - Beautiful interface with dark mode support
+- 🖼️ **Dynamic Platform Logos** - Search TOTP services from 2FA Directory by name or domain, with automatic issuer matching and a cached platform list
 - 🌍 **Bilingual** - Full support for English and Chinese (简体中文)
 - 📤 **Import/Export** - Batch import and export accounts via QR codes
 - 🔍 **Quick Search** - Instantly find accounts with real-time search
@@ -74,7 +75,7 @@ pnpm build
 
 **Method 2: Manual Entry**
 1. Click the "+" button
-2. Enter platform name, account name, and secret key
+2. Search and select a platform logo (optional), then enter platform name, account name, and secret key
 3. Click "Import"
 
 ### Managing Accounts
@@ -99,6 +100,7 @@ pnpm build
 - **Styling**: Tailwind CSS
 - **TOTP Library**: [@14kay/totp-auth](https://www.npmjs.com/package/@14kay/totp-auth)
 - **Icons**: Lucide React
+- **Platform Logos**: [2FA Directory](https://2fa.directory/), using its TOTP service API and repository images served through jsDelivr
 - **QR Code**: qrcode + jsqr
 - **Storage**: Chrome Storage API (Manifest V3)
 
@@ -108,7 +110,7 @@ pnpm build
 totp-manager/
 ├── public/
 │   ├── icons/           # Extension icons
-│   ├── logos/           # Platform logos
+│   ├── logos/           # Packaged logo fallbacks matched by platform name
 │   └── manifest.json    # Chrome extension manifest
 ├── src/
 │   ├── components/      # React components
@@ -137,7 +139,7 @@ totp-manager/
 ## 🔒 Security
 
 - **Local Storage Only**: All data is stored locally using Chrome's encrypted storage API
-- **No Network Requests**: The extension works completely offline
+- **Offline TOTP**: Generating codes and managing accounts work offline. Platforms come from the [2FA Directory TOTP API](https://api.2fa.directory/v3/totp.json), with official SVG/PNG images served through `https://cdn.jsdelivr.net/gh/2factorauth/twofactorauth@master/img/` and its [official GitHub repository](https://github.com/2factorauth/twofactorauth/tree/master/img) as an image fallback; account names and secrets are never included in these requests. The catalog is cached in `chrome.storage.local` for 24 hours and refreshed when next opened; an expired cache remains usable if refreshing fails. Packaged logos are automatically indexed by filename and matched by platform name regardless of case, dots, spaces, hyphens or underscores. Missing directory entries or unavailable images fall back to a matching packaged logo, then initials.
 - **WebAuthn Support**: Optional biometric authentication for exports
 - **Open Source**: Full transparency - review the code yourself
 
@@ -166,6 +168,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Google Authenticator](https://github.com/google/google-authenticator) for the migration format
 - [Lucide](https://lucide.dev/) for beautiful icons
+- Data sourced from [2FA Directory](https://2fa.directory/) by [2factorauth](https://github.com/2factorauth/) for TOTP services and platform logos
 - [Tailwind CSS](https://tailwindcss.com/) for styling utilities
 - All the amazing open-source libraries used in this project
 

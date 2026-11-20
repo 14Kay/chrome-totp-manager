@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react'
 import jsQR from 'jsqr'
-import { QrCode, ArrowLeft, Tag, User, Key, List } from 'lucide-react'
+import { QrCode, ArrowLeft, Tag, User, Key } from 'lucide-react'
 import type { Account } from '@/types'
 import { Input } from './Input'
-import { Select } from './Select'
+import { PlatformSelect } from './PlatformSelect'
 import { Toast, ToastType } from './Toast'
 import { useLanguage } from '@/hooks/useLanguage'
 import { parseGoogleAuthMigration } from '@/lib/googleAuthMigration'
+import { getPlatformLogo, type LogoPlatform } from '@/lib/logos'
 
 interface AddAccountPageProps {
 	existingAccounts: Account[]
@@ -16,28 +17,6 @@ interface AddAccountPageProps {
 	onBack: () => void
 	isDark?: boolean
 }
-
-const PLATFORMS = [
-	{ name: 'Alibaba Cloud', logo: 'alibabacloud-icon.svg' },
-	{ name: 'Apple', logo: 'apple-icon.svg' },
-	{ name: 'Bing', logo: 'bing-icon.svg' },
-	{ name: 'Cloudflare', logo: 'cloudflare-icon.svg' },
-	{ name: 'Epic Games', logo: 'epicgames-icon.svg' },
-	{ name: 'GitHub', logo: 'github-icon.svg' },
-	{ name: 'GitLab', logo: 'gitlab-icon.svg' },
-	{ name: 'Gmail', logo: 'gmail-icon.svg' },
-	{ name: 'Google', logo: 'google-icon.svg' },
-	{ name: 'IBM', logo: 'ibm-icon.svg' },
-	{ name: 'Instagram', logo: 'instagram-icon.svg' },
-	{ name: 'LINUX DO', logo: 'linux.do-icon.svg' },
-	{ name: 'Metabase', logo: 'metabase-icon.svg' },
-	{ name: 'Microsoft', logo: 'microsoft-icon.svg' },
-	{ name: 'Microsoft Edge', logo: 'microsoft_edge-icon.svg' },
-	{ name: 'npm', logo: 'npmjs-icon.svg' },
-	{ name: 'Rockstar Games', logo: 'rockstargames-icon.svg' },
-	{ name: 'Twitter', logo: 'twitter-icon.svg' },
-	{ name: 'Zoom', logo: 'zoomus-icon.svg' },
-]
 
 export function AddAccountPage({ existingAccounts, onImport, onImportMultiple, onReplace, onBack, isDark }: AddAccountPageProps) {
 	const { t } = useLanguage()
@@ -74,6 +53,7 @@ export function AddAccountPage({ existingAccounts, onImport, onImportMultiple, o
 
 			if (secretKey) {
 				setIssuer(issuerName)
+				setLogo('')
 				setAccount(accountName)
 				setSecret(secretKey)
 				setToast({ message: t('qrRecognized'), type: 'success' })
@@ -199,11 +179,10 @@ export function AddAccountPage({ existingAccounts, onImport, onImportMultiple, o
 		}
 	}
 
-	const handlePlatformSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const selected = PLATFORMS.find(p => p.logo === e.target.value)
+	const handlePlatformSelect = (selected: LogoPlatform | undefined) => {
 		if (selected) {
 			setIssuer(selected.name)
-			setLogo(selected.logo)
+			setLogo(getPlatformLogo(selected))
 		} else {
 			setLogo('')
 		}
@@ -282,23 +261,19 @@ export function AddAccountPage({ existingAccounts, onImport, onImportMultiple, o
 					</div>
 					<div className="text-xs text-gray-500 dark:text-gray-400 text-center">{t('orManualInput')}</div>
 					<div className="space-y-4 card-block dark:bg-gray-800">
-						<Select
-							label={t('selectPlatform')}
-							icon={List}
+						<PlatformSelect
 							value={logo}
 							onChange={handlePlatformSelect}
-							className="input"
-							options={[
-								{ value: '', label: t('customPlatform') },
-								...PLATFORMS.map(p => ({ value: p.logo, label: p.name })),
-							]}
 						/>
 						<Input
 							label={t('platformName')}
 							icon={Tag}
 							type="text"
 							value={issuer}
-							onChange={(e) => setIssuer(e.target.value)}
+							onChange={(e) => {
+								setIssuer(e.target.value)
+								setLogo('')
+							}}
 							placeholder={t('exampleGoogle')}
 							className="input"
 							required

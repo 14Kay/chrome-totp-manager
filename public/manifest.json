@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "TOTP Manager",
-	"version": "0.0.4",
+	"version": "0.0.5",
 	"description": "A secure, offline-first TOTP authenticator for Chrome. Manage your 2FA codes with ease, featuring import/export and dark mode.",
 	"author": "14K",
 	"action": {
@@ -23,7 +23,10 @@
 		"storage",
 		"clipboardWrite"
 	],
+	"host_permissions": [
+		"https://api.2fa.directory/*"
+	],
 	"content_security_policy": {
-		"extension_pages": "script-src 'self'; object-src 'self'"
+		"extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://api.2fa.directory; img-src 'self' data: blob: https://cdn.jsdelivr.net https://raw.githubusercontent.com"
 	}
 }
